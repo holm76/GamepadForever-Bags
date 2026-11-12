@@ -2,12 +2,21 @@
 ## Title: Gamepad Forever: Bags
 ## Category: Gamepad Forever
 ## Notes: Stacks bags inside the native combined inventory.
-## Version: 1.0.11
+## Notes-deDE: Zeigt die Taschen im kombinierten Inventar von WoW untereinander an.
+## Notes-esES: Muestra las bolsas una debajo de otra en el inventario combinado de WoW.
+## Notes-frFR: Affiche les sacs les uns sous les autres dans l’inventaire combiné de WoW.
+## Notes-ptBR: Exibe as bolsas uma abaixo da outra no inventário combinado do WoW.
+## Notes-ruRU: Располагает сумки друг под другом в объединённом рюкзаке WoW.
+## Version: 1.0.12
 ## Dependencies: Blizzard_UIPanels_Game
 ## SavedVariables: GamepadForeverBagsSettings
 ## IconTexture: Interface\Icons\Inv_misc_bag_08
 
 Localization\EN.lua
+Localization\DE.lua
+Localization\ES.lua
+Localization\FR.lua
+Localization\PT.lua
 Localization\RU.lua
 Settings.lua
 Bags.lua

@@ -15,4 +15,4 @@ Open **Settings → AddOns → Gamepad Forever: Bags** to enable **Sort bags on 
 - `Addon.lua` selects the interface language and initializes settings before registering the bag logic.
 - `Settings.lua` registers the options in WoW and returns the saved settings table.
 - `Bags.lua` lays out the bag sections, updates gamepad navigation, and handles automatic sorting.
-- `Localization/` contains English and Russian translations. WoW's interface language selects the translation, with English as the fallback.
+- `Localization/` contains English, French, German, Portuguese, Russian, and Spanish translations. WoW's interface language selects the translation, with English as the fallback.
