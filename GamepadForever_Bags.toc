@@ -2,9 +2,9 @@
 ## Title: Gamepad Forever: Bags
 ## Category: Gamepad Forever
 ## Notes: Stacks bags inside the native combined inventory.
-## Version: 1.0.9
+## Version: 1.0.11
 ## Dependencies: Blizzard_UIPanels_Game
-## SavedVariables: ForeverBagSectionsSettings
+## SavedVariables: GamepadForeverBagsSettings
 ## IconTexture: Interface\Icons\Inv_misc_bag_08
 
 Localization\EN.lua
