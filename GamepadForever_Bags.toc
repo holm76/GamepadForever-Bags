@@ -22,4 +22,5 @@ Localization\RU.lua
 Settings.lua
 Bags.lua
 SelectionMemory.lua
+Navigation.lua
 Addon.lua
