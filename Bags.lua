@@ -8,7 +8,7 @@ end
 
 -- Extension point for optional modules (SelectionMemory.lua, Navigation.lua). A listener is a table
 -- with any of these methods, called with the listener as self:
---   Init(inventory)            once, when the bag logic is registered
+--   Init(inventory, db)        once, when the bag logic is registered; db is the saved settings
 --   Layout(sections, columns)  after each gamepad layout; sections are in display order, each with
 --                              id, button (bag slot button or nil) and slots (shown item buttons)
 --   NavigationRefreshed()      after SmartNavigation's button groups were rebuilt (out of combat)
@@ -260,6 +260,6 @@ function addon.RegisterBags(inventory, db)
     EventRegistry:RegisterCallback("ContainerFrame.OpenBag", onBagVisibilityChanged, events)
     EventRegistry:RegisterCallback("ContainerFrame.CloseBag", onBagVisibilityChanged, events)
 
-    notify("Init", inventory)
+    notify("Init", inventory, db)
     arrangeInventory()
 end

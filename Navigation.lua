@@ -1,6 +1,7 @@
 local _, addon = ...
 
--- Gamepad navigation: preferred column, wrapping, the bag slot column and reading-order Left/Right.
+-- Gamepad navigation: preferred column, wrapping, the bag slot column and Left/Right at row edges
+-- (wrapping within the row by default, or reading order when the setting is enabled).
 --
 -- SmartNavigation has no notion of a preferred column; Up/Down pick the nearest button by raycast.
 -- Its static jump overrides (SmartNavigation_AddJumpNavigationOverride with a button, never a
@@ -11,6 +12,7 @@ local _, addon = ...
 local Navigation = {}
 
 local inventory
+local settings           -- saved settings; readingOrderNavigation picks the row-edge mode
 local tracking = false
 local navRows = {}       -- visual item rows, top to bottom, across all bag sections
 local navPosition = {}   -- item button -> {row = index into navRows, column = 1-based}
@@ -66,8 +68,9 @@ local function clearOverrides(except)
 end
 
 -- Reading order: bag slot button, its items row by row, next bag slot button ... wrapping at both
--- ends. Left/Right at row ends and on bag slot buttons step through it, so a bag slot's Left
--- reaches the previous bag's last item and a bag's last item's Right reaches the next bag slot.
+-- ends. Left/Right on bag slot buttons (and at row ends with the reading-order setting) step
+-- through it, so a bag slot's Left reaches the previous bag's last item and a bag slot's Right
+-- reaches its first item.
 local function sequenceNeighbour(button, step)
     local index = sequenceIndex[button]
     if not index or #navSequence < 2 then return end
@@ -124,12 +127,20 @@ local function update()
     navDown = targetInRow(position.row + 1, preferredColumn)
     if not navDown and position.row > 1 then navDown = targetInRow(1, preferredColumn) end
 
-    -- Left/Right at the ends of a row follow reading order; mid-row moves stay native.
+    -- Left/Right at the ends of a row wrap within the row (default) or follow reading order
+    -- (setting); mid-row moves stay native. Either way a bag's first item keeps Left to its bag
+    -- slot button (its reading-order neighbour), so the bag slot column stays reachable.
     local left, right
     if position.column then
         local row = navRows[position.row]
-        if position.column == 1 then left = sequenceNeighbour(button, -1) end
-        if position.column == #row then right = sequenceNeighbour(button, 1) end
+        local readingOrder = settings and settings.readingOrderNavigation
+        if position.column == 1 then
+            local previous = sequenceNeighbour(button, -1)
+            left = (readingOrder or (previous and gutterIndex[previous])) and previous or row[#row]
+        end
+        if position.column == #row then
+            right = readingOrder and sequenceNeighbour(button, 1) or row[1]
+        end
     else
         left, right = sequenceNeighbour(button, -1), sequenceNeighbour(button, 1)
     end
@@ -177,8 +188,14 @@ end
 
 -- Listener methods (see addon.RegisterBagsListener in Bags.lua)
 
-function Navigation:Init(frame)
+function Navigation:Init(frame, db)
     inventory = frame
+    settings = db
+    -- Switching the row-edge mode applies to the focused button right away (out of combat;
+    -- otherwise when combat ends).
+    if Settings and Settings.SetOnValueChangedCallback and addon.READING_ORDER_SETTING then
+        Settings.SetOnValueChangedCallback(addon.READING_ORDER_SETTING, function() update() end)
+    end
 end
 
 function Navigation:Layout(sections, columns)
