@@ -17,7 +17,7 @@ Open **Settings → AddOns → Gamepad Forever: Bags** to change these options. 
 
 In gamepad mode, the addon extends WoW's controller navigation inside the combined bags:
 
-- **Cursor memory:** the inventory reopens on the item slot or bag slot you last focused. The position is saved per character, so it survives `/reload` and logging out. If that bag shrank, focus goes to the nearest slot in it; if the bag is gone or collapsed, WoW's default focus is used.
+- **Cursor memory:** the inventory reopens on the item slot or bag slot you last focused. The position is saved per character, so it survives `/reload` and logging out. This also works when the bank or another window opens the bags: the saved slot is restored when you move into the inventory. If that bag shrank, focus goes to the nearest slot in it; if the bag is gone or collapsed, WoW's default focus is used.
 - **Preferred column:** Up and Down keep the column you were heading for across bags of different sizes. From cell 9, Down into a 6-slot bag lands on cell 6, and Down again returns to cell 9. Moving Left or Right sets a new column.
 - **Wrapping:** Down from the bottom row returns to the top row in your column, and Up from the top row goes to the bottom row. Empty and collapsed bag slots are part of the rows, so Up and Down stop on them.
 - **Bag slot column:** in the bag slot column, Up and Down move between bag slots. A bag slot reached from the items keeps following the item rows; one reached along the column follows the column.

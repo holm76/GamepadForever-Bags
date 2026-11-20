@@ -37,6 +37,8 @@ local function isInventoryItem(button)
     return false
 end
 
+local scheduleRestore -- defined below tryRestoreSelection
+
 local function onSelectedButtonUpdated()
     if SmartNavigation:GetActiveFrame() ~= inventory then return end
     local button = SmartNavigation:GetCurrentButton()
@@ -48,7 +50,10 @@ local function onSelectedButtonUpdated()
         end
         restorePending = false
     elseif restorePending then
-        -- Ignore Blizzard's initial focus on the backpack bag slot while a restore is pending.
+        -- Blizzard's initial focus on the backpack bag slot is not saved while a restore is
+        -- pending. The inventory may only now have become the active frame (after the bank
+        -- or another panel had focus), so try the restore again.
+        scheduleRestore()
         return
     elseif bagIDByButton[button] then
         -- A bag slot button is saved as its bag with no slot.
@@ -79,11 +84,17 @@ end
 local function tryRestoreSelection()
     if not restorePending or addon.IsLayoutRestricted() then return end
     if not SmartNavigation:GetPanelInfo(inventory, true) then return end
-    restorePending = false
+
+    -- When another panel owns focus (the bank, a merchant ...), the inventory only gets a target
+    -- button, and SmartNavigation prefers the panel's own last button (the backpack bag slot)
+    -- once the player moves into the inventory. So the restore stays pending until the inventory
+    -- is the active frame; onSelectedButtonUpdated then runs it again.
+    local active = SmartNavigation:GetActiveFrame() == inventory
+    restorePending = not active
 
     local current = SmartNavigation:GetCurrentButton()
     local nativeDefault = GamepadBagBar and GamepadBagBar:GetBagButton(BACKPACK_CONTAINER)
-    if SmartNavigation:GetActiveFrame() == inventory and current and current ~= nativeDefault then
+    if active and current and current ~= nativeDefault then
         return -- The player already moved; never pull the cursor away.
     end
 
@@ -103,6 +114,26 @@ local function tryRestoreSelection()
     if button and button ~= current then
         SmartNavigation:SetTargetButtonForFrame(inventory, button)
     end
+end
+
+-- Restoring is a convenience: any unexpected failure forgets the saved slot and leaves WoW's
+-- default focus, instead of raising a Lua error.
+local function restoreSafely()
+    if not pcall(tryRestoreSelection) then
+        restorePending = false
+        lastSelection.bagID, lastSelection.slotID = nil, nil
+    end
+end
+
+-- Runs on the next frame, outside SmartNavigation's own selection callback.
+local restoreScheduled = false
+function scheduleRestore()
+    if restoreScheduled then return end
+    restoreScheduled = true
+    C_Timer.After(0, function()
+        restoreScheduled = false
+        restoreSafely()
+    end)
 end
 
 -- Listener methods (see addon.RegisterBagsListener in Bags.lua)
@@ -131,13 +162,8 @@ function SelectionMemory:Layout(sections)
     end
 end
 
--- Restoring is a convenience: any unexpected failure forgets the saved slot and leaves WoW's
--- default focus, instead of raising a Lua error.
 function SelectionMemory:NavigationRefreshed()
-    if not pcall(tryRestoreSelection) then
-        restorePending = false
-        lastSelection.bagID, lastSelection.slotID = nil, nil
-    end
+    restoreSafely()
 end
 
 function SelectionMemory:Closed()
